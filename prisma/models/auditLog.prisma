@@ -1,0 +1,12 @@
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  method     String
+  endpoint   String
+  statusCode Int?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}

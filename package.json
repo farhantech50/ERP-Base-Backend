@@ -1,0 +1,34 @@
+{
+  "name": "erp-base-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node config/swagger.js && nodemon server.js",
+    "start": "node server.js",
+    "swagger": "node config/swagger.js",
+    "prisma:generate": "dotenv -e .env.development -- prisma generate",
+    "prisma:migrate": "dotenv -e .env.development -- prisma migrate dev",
+    "prisma:seed": "dotenv -e .env.development -- node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "argon2": "^0.41.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.5.0",
+    "nodemailer": "^6.9.13",
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.7.5",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "prisma": "^7.8.0",
+    "swagger-autogen": "^2.23.7"
+  }
+}

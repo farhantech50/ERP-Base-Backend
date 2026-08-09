@@ -1,0 +1,101 @@
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  method     String
+  endpoint   String
+  statusCode Int?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model Lookup {
+  id        Int      @id @default(autoincrement())
+  name      String
+  value     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  rolePermissions RolePermission[]
+  userRole        User[]           @relation("role")
+
+  @@map("lookups")
+}
+
+model Permission {
+  id              Int              @id @default(autoincrement())
+  key             String           @unique
+  label           String?
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  permissionId Int
+  roleId       Int
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Lookup     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id                  Int                  @id @default(autoincrement())
+  employeeId          String?              @unique
+  username            String               @unique
+  email               String?              @unique
+  password            String
+  contact             String?
+  address             String?
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  roleId              Int
+  dateOfBirth         DateTime?
+  fullName            String
+  joiningDate         DateTime?
+  nidNumber           String?
+  passwordResetTokens PasswordResetToken[]
+  refreshTokens       RefreshToken[]
+  role                Lookup               @relation("role", fields: [roleId], references: [id])
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+}

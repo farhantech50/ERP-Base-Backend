@@ -1,0 +1,46 @@
+model User {
+  id                  Int                  @id @default(autoincrement())
+  employeeId          String?              @unique
+  username            String               @unique
+  email               String?              @unique
+  password            String
+  contact             String?
+  address             String?
+  isActive            Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  roleId              Int
+  dateOfBirth         DateTime?
+  fullName            String
+  joiningDate         DateTime?
+  nidNumber           String?
+  passwordResetTokens PasswordResetToken[]
+  refreshTokens       RefreshToken[]
+  role                Lookup               @relation("role", fields: [roleId], references: [id])
+  
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}

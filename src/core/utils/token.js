@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import prisma from "../../../config/dbConfig.js";
 
-export const generateAccessToken = (user, permissions) => {
+export const generateAccessToken = (user) => {
   return jwt.sign(
     {
       id: user.id,
@@ -11,7 +11,6 @@ export const generateAccessToken = (user, permissions) => {
       roleName: user.role.value,
       fullName: user.fullName,
       username: user.username,
-      permissions,
     },
     process.env.JWT_KEY,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },

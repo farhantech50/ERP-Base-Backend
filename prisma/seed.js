@@ -47,43 +47,55 @@ async function main() {
     console.log('User superadmin already exists. Updated employeeId to EMP0001.');
   }
 
-  // 3. Create SUPER permission and assign to Super Admin role
-  let superPermission = await prisma.permission.findUnique({
-    where: { key: "SUPER" },
-  });
+  // 3. Create permissions and assign to Super Admin role
+  const permissionsToSeed = [
+    { key: "SUPER", label: "Super Admin Access" },
+    { key: "CREATE_USER", label: "Create User" },
+    { key: "UPDATE_USER", label: "Update User" },
+    { key: "VIEW_USER", label: "View User" },
+    { key: "DELETE_USER", label: "Delete User" },
+  ];
 
-  if (!superPermission) {
-    superPermission = await prisma.permission.create({
-      data: {
-        key: "SUPER",
-        label: "Super Admin Access",
-      },
+  for (const perm of permissionsToSeed) {
+    let existingPerm = await prisma.permission.findUnique({
+      where: { key: perm.key },
     });
-    console.log("Created SUPER permission.");
-  } else {
-    console.log("SUPER permission already exists.");
+
+    if (!existingPerm) {
+      existingPerm = await prisma.permission.create({
+        data: perm,
+      });
+      console.log(`Created ${perm.key} permission.`);
+    } else {
+      console.log(`${perm.key} permission already exists.`);
+    }
   }
 
-  const existingRolePermission = await prisma.rolePermission.findUnique({
-    where: {
-      roleId_permissionId: {
-        roleId: superAdminRole.id,
-        permissionId: superPermission.id,
-      },
-    },
-  });
-
-  if (!existingRolePermission) {
-    await prisma.rolePermission.create({
-      data: {
-        roleId: superAdminRole.id,
-        permissionId: superPermission.id,
+  // 4. Assign SUPER to Super Admin role
+  const superPerm = await prisma.permission.findUnique({ where: { key: "SUPER" } });
+  if (superPerm) {
+    const existingRolePermission = await prisma.rolePermission.findUnique({
+      where: {
+        roleId_permissionId: {
+          roleId: superAdminRole.id,
+          permissionId: superPerm.id,
+        },
       },
     });
-    console.log("Assigned SUPER permission to Super Admin role.");
-  } else {
-    console.log("Super Admin role already has SUPER permission.");
+
+    if (!existingRolePermission) {
+      await prisma.rolePermission.create({
+        data: {
+          roleId: superAdminRole.id,
+          permissionId: superPerm.id,
+        },
+      });
+      console.log(`Assigned SUPER to Super Admin role.`);
+    } else {
+      console.log(`Super Admin role already has SUPER permission.`);
+    }
   }
+
 }
 
 main()

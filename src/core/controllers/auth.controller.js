@@ -7,7 +7,6 @@ import {
   saveRefreshToken,
   setRefreshTokenCookie,
 } from "../utils/token.js";
-import { getPermissionsForRole } from "../utils/permission.js";
 import { sendPasswordResetEmail } from "../../../config/mailer.js";
 
 export const loginUser = async (req, res) => {
@@ -41,13 +40,11 @@ export const loginUser = async (req, res) => {
       return res.status(403).json({ error: "Account is disabled" });
     }
 
-    const permissions = await getPermissionsForRole(user.roleId);
-
     const refreshToken = generateRefreshToken();
 
     await saveRefreshToken(user.id, refreshToken);
 
-    const accessToken = generateAccessToken(user, permissions);
+    const accessToken = generateAccessToken(user);
 
     const responseData = {
       id: user.id,
@@ -56,7 +53,6 @@ export const loginUser = async (req, res) => {
       username: user.username,
       roleId: user.roleId,
       role: user.role.value,
-      permissions,
       accessToken,
     };
 
@@ -118,9 +114,7 @@ export const refreshAccessToken = async (req, res) => {
       });
     }
 
-    const permissions = await getPermissionsForRole(user.roleId);
-
-    const accessToken = generateAccessToken(user, permissions);
+    const accessToken = generateAccessToken(user);
 
     return res.status(200).json({
       accessToken,
